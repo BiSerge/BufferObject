@@ -10,62 +10,47 @@ namespace BufferObject
 {
     class Program
     {
-        private static int ChainLength = 20;
-        private static int ThreadsManufactur = 3;
-        private int ThreadsLogist;
-        private int ThreadsConsumer;
+        private static int ChainLength = 20;            // Длина тестовой цепочки
+        private static int ThreadsManufactur = 3;       // Колич. потоков для производителей
+        private int ThreadsLogist;                      // Колич. потоков для логистов
+        private int ThreadsConsumer;                    // Колич. потоков для потребителей
 
         static void Main(string[] args)
         {
-            Storage mySklad1 = new Storage("Sklad1");
+            Storage mySklad1 = new Storage("Sklad1");   // Создание складов
             Storage mySklad2 = new Storage("Sklad2");
 
-            Console.WriteLine("На складе 1 находится товар: ");
-            Console.WriteLine(mySklad1.GetSpisok());
-            Console.WriteLine("Всего: {0} шт.", mySklad1.GetCount());
+            Console.WriteLine("На складе 1 товар в количестве: {0} шт.", mySklad1.GetCount());
             Console.WriteLine();
 
-            //Manufacturer myManufacturer1 = new Manufacturer("Яблоко", mySklad);
-            //for (int i = 0; i < 5; i++)
-            //    myManufacturer1.PlaceStorage();
-
-            //Manufacturer myManufacturer2 = new Manufacturer("Бублик", mySklad);
-            //for (int i = 0; i < 5; i++)
-            //    myManufacturer2.PlaceStorage();
-            //Boolean myBol = await AccessAsync();
-
+            // Вызов построителя потоков
             ResultManufacturerAsync(mySklad1, mySklad2, ThreadsManufactur, ChainLength).GetAwaiter();
-            //ResultLogisticAsync(mySklad1, mySklad2).GetAwaiter();
-
-            //Console.WriteLine("На склад помещен товар, теперь на складе {0} шт. товара:", mySklad.GetCount());
-            //Console.WriteLine(mySklad.GetSpisok());
-            //Console.WriteLine();
 
             Console.WriteLine("Press any key to continue . . . ");
             Console.ReadKey(true);
         }
 
+        // Построитель потоков
         static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2, int k, int j)
         {
-            Task[] myTask = new Task[k + 3];
-            for (int i = 0; i < k; i++)
-                myTask[i] = ManufacturerAsync("Яблоко", mySklad1, j);
-            for (int i = 3; i < 6; i++)
-                myTask[i] = LogisticAsync(mySklad1, mySklad2);
+            Task[] myTask = new Task[k + 3];    // Масив всех потоков
+            for (int i = 0; i < k; i++)         
+                myTask[i] = ManufacturerAsync("Яблоко", mySklad1, j);   // Производители
 
-            await Task.WhenAll(myTask);
+            for (int i = 3; i < 6; i++)
+                myTask[i] = LogisticAsync(mySklad1, mySklad2);          // Логисты
+
+            await Task.WhenAll(myTask);     // Запуск всех потоков
 
             Console.WriteLine("На склад помещен товар, теперь на складе {0} шт. товара:", mySklad1.GetCount());
-            //Console.WriteLine(mySklad1.GetSpisok());
             Console.WriteLine();
 
             Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
-            //Console.WriteLine(mySklad1.GetSpisok());
             Console.WriteLine("На 2 склае всего {0} шт. товара:", mySklad2.GetCount());
-            //Console.WriteLine(mySklad2.GetSpisok());
             Console.WriteLine();
         }
 
+        // Задача, "Производители" отдают товар на 1 склад
         static Task ManufacturerAsync(string NameGoods, Storage mySklad, int j)
         {
             return Task.Run(() =>
@@ -73,14 +58,16 @@ namespace BufferObject
                 Manufacturer myManufacturer = new Manufacturer();
                 for (int i = 0; i < j; i++)
                 { 
-                    myManufacturer.PlaceStorage(NameGoods, mySklad);
+                    myManufacturer.PlaceStorage(mySklad);
                     Console.WriteLine("Положить на склад 1 поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    // Имитация произвольных обращений
                     Random rnd = new Random();
                     Thread.Sleep(rnd.Next(0, 1000));                   
                 }
             });
         }
 
+        // Задача для потока перемещения с 1 склада на 2
         static Task LogisticAsync(Storage mySklad1, Storage mySklad2)
         {
             return Task.Run(() =>
@@ -89,7 +76,8 @@ namespace BufferObject
                 for (int i = 0; i < 10; i++)
                 {
                     myLogistic.MoveGoods(mySklad1, mySklad2);
-                    Console.WriteLine("Забрать на склад 2 - {0}", Thread.CurrentThread.ManagedThreadId);
+                    Console.WriteLine("Забрать на склад 2 поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    // Имитация произвольных обращений
                     Random rnd = new Random();                    
                     Thread.Sleep(rnd.Next(0, 1000));
                 }

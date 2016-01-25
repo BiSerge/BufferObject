@@ -10,6 +10,5 @@ namespace BufferObject.WorkStorage
             if (myTovar != null)
                 myStorage2.AddTovar(myTovar);
         }
-
     }
 }

@@ -26,7 +26,12 @@ namespace BufferObject
         {
         	SaveSklad(myFileName);
         }
-        
+
+        internal void AddTovar(object p)
+        {
+            throw new NotImplementedException();
+        }
+
         public void AddTovar(Goods tovar)
         {
             myQueue.Enqueue(tovar);
@@ -39,19 +44,6 @@ namespace BufferObject
                 return myGoods;
             else
                 return null;
-
-            //myQueue.TrimExcess();
-            //return myGoods;
-        }
-
-        public string GetSpisok()
-        {
-            string spisok = "";
-
-            foreach (Goods tov in myQueue)
-                spisok += tov.Name + "; ";
-
-            return spisok;
         }
         
         public int GetCount()
