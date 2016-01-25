@@ -45,11 +45,11 @@ namespace BufferObject
             }
         }
 
-        //TODO Нужно перемешать массив поток, иначе запускаются последовательно!!!
         // Построитель потоков
         private static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2)
         {
             Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist + ThreadsConsumer];    // Масив всех потоков
+            RndArray(myTask);
 
             for (int i = 0; i < ThreadsManufactur; i++)         
                 myTask[i] = ManufacturerAsync(mySklad1);                    // Производители
@@ -65,6 +65,20 @@ namespace BufferObject
             Console.WriteLine();
             Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
             Console.WriteLine("На 2 складе осталось {0} шт. товара:", mySklad2.GetCount());            
+        }
+
+        private static Task[] RndArray(Task[] myTask)    // Перемешиваю массив потоков
+        {
+            if (myTask.Length < 1) return myTask;
+            var random = new Random();
+            for (var i = 0; i < myTask.Length; i++)
+            {
+                var key = myTask[i];
+                var rnd = random.Next(i, myTask.Length);
+                myTask[i] = myTask[rnd];
+                myTask[rnd] = key;
+            }
+            return myTask;
         }
 
         // Задача, "Производители" отдают товар на 1 склад
