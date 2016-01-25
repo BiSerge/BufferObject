@@ -10,10 +10,10 @@ namespace BufferObject
 {
     class Program
     {
-        private static int ChainLength = 20;            // Длина тестовой цепочки
-        private static int ThreadsManufactur = 3;       // Колич. потоков для производителей
-        private int ThreadsLogist;                      // Колич. потоков для логистов
-        private int ThreadsConsumer;                    // Колич. потоков для потребителей
+        private static int ChainLength = 10;            // Длина тестовой цепочки
+        private static int ThreadsManufactur = 5;       // Колич. потоков для производителей
+        private static int ThreadsLogist = 5;           // Колич. потоков для логистов
+        private static int ThreadsConsumer;             // Колич. потоков для потребителей
 
         static void Main(string[] args)
         {
@@ -33,30 +33,27 @@ namespace BufferObject
         // Построитель потоков
         static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2, int k, int j)
         {
-            Task[] myTask = new Task[k + 3];    // Масив всех потоков
-            for (int i = 0; i < k; i++)         
-                myTask[i] = ManufacturerAsync("Яблоко", mySklad1, j);   // Производители
+            Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist];    // Масив всех потоков
+            for (int i = 0; i < ThreadsManufactur; i++)         
+                myTask[i] = ManufacturerAsync(mySklad1, j);   // Производители
 
-            for (int i = 3; i < 6; i++)
+            for (int i = ThreadsManufactur; i < ThreadsManufactur + ThreadsLogist; i++)
                 myTask[i] = LogisticAsync(mySklad1, mySklad2);          // Логисты
 
             await Task.WhenAll(myTask);     // Запуск всех потоков
 
-            Console.WriteLine("На склад помещен товар, теперь на складе {0} шт. товара:", mySklad1.GetCount());
             Console.WriteLine();
-
             Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
-            Console.WriteLine("На 2 склае всего {0} шт. товара:", mySklad2.GetCount());
-            Console.WriteLine();
+            Console.WriteLine("На 2 склае всего {0} шт. товара:", mySklad2.GetCount());            
         }
 
         // Задача, "Производители" отдают товар на 1 склад
-        static Task ManufacturerAsync(string NameGoods, Storage mySklad, int j)
+        static Task ManufacturerAsync(Storage mySklad, int j)
         {
             return Task.Run(() =>
             {
                 Manufacturer myManufacturer = new Manufacturer();
-                for (int i = 0; i < j; i++)
+                for (int i = 0; i < ChainLength; i++)
                 { 
                     myManufacturer.PlaceStorage(mySklad);
                     Console.WriteLine("Положить на склад 1 поток - {0}", Thread.CurrentThread.ManagedThreadId);
@@ -73,7 +70,7 @@ namespace BufferObject
             return Task.Run(() =>
             {
                 Logistic myLogistic = new Logistic();
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < ChainLength; i++)
                 {
                     myLogistic.MoveGoods(mySklad1, mySklad2);
                     Console.WriteLine("Забрать на склад 2 поток - {0}", Thread.CurrentThread.ManagedThreadId);
