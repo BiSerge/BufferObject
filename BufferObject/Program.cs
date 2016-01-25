@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Threading;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 using BufferObject.WorkStorage;
 
 namespace BufferObject
 {
     class Program
     {
-        private static int ChainLength = 10;            // Длина тестовой цепочки
-        private static int ThreadsManufactur = 5;       // Колич. потоков для производителей
-        private static int ThreadsLogist = 5;           // Колич. потоков для логистов
-        private static int ThreadsConsumer = 5;         // Колич. потоков для потребителей
+        private static int ChainLength          = 10;      // Длина тестовой цепочки
+        private static int ThreadsManufactur    = 3;       // Колич. потоков для производителей
+        private static int ThreadsLogist        = 3;       // Колич. потоков для логистов
+        private static int ThreadsConsumer      = 3;       // Колич. потоков для потребителей
 
         static void Main(string[] args)
         {
+            LoadSeting();
+
             Storage mySklad1 = new Storage("Sklad1");   // Создание складов
             Storage mySklad2 = new Storage("Sklad2");
 
@@ -30,9 +30,24 @@ namespace BufferObject
             Console.ReadKey(true);
         }
 
+        private static void LoadSeting()
+        {
+            try
+            {
+                ChainLength         = int.Parse(ConfigurationManager.AppSettings[0]);
+                ThreadsManufactur   = int.Parse(ConfigurationManager.AppSettings[1]);
+                ThreadsLogist       = int.Parse(ConfigurationManager.AppSettings[2]);
+                ThreadsConsumer     = int.Parse(ConfigurationManager.AppSettings[3]);
+            }
+            catch
+            {
+                Console.WriteLine("Ошибка чтения параметров! Будут применены параметры по умолчанию");
+            }
+        }
+
         //TODO Нужно перемешать массив поток, иначе запускаются последовательно!!!
         // Построитель потоков
-        static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2)
+        private static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2)
         {
             Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist + ThreadsConsumer];    // Масив всех потоков
 
@@ -53,7 +68,7 @@ namespace BufferObject
         }
 
         // Задача, "Производители" отдают товар на 1 склад
-        static Task ManufacturerAsync(Storage mySklad)
+        private static Task ManufacturerAsync(Storage mySklad)
         {
             return Task.Run(() =>
             {
@@ -70,7 +85,7 @@ namespace BufferObject
         }
 
         // Задача для потока перемещения с 1 склада на 2
-        static Task LogisticAsync(Storage mySklad1, Storage mySklad2)
+        private static Task LogisticAsync(Storage mySklad1, Storage mySklad2)
         {
             return Task.Run(() =>
             {
@@ -89,7 +104,7 @@ namespace BufferObject
         }
 
         // Задача для потока "потребителей"
-        static Task ConsumerAsync(Storage mySklad2)
+        private static Task ConsumerAsync(Storage mySklad2)
         {
             return Task.Run(() =>
             {
@@ -105,6 +120,6 @@ namespace BufferObject
                     Thread.Sleep(rnd.Next(0, 1000));
                 }
             });
-        }
+        }       
     }
 }
