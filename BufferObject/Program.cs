@@ -13,7 +13,7 @@ namespace BufferObject
         private static int ChainLength = 10;            // Длина тестовой цепочки
         private static int ThreadsManufactur = 5;       // Колич. потоков для производителей
         private static int ThreadsLogist = 5;           // Колич. потоков для логистов
-        private static int ThreadsConsumer;             // Колич. потоков для потребителей
+        private static int ThreadsConsumer = 5;         // Колич. потоков для потребителей
 
         static void Main(string[] args)
         {
@@ -24,31 +24,36 @@ namespace BufferObject
             Console.WriteLine();
 
             // Вызов построителя потоков
-            ResultManufacturerAsync(mySklad1, mySklad2, ThreadsManufactur, ChainLength).GetAwaiter();
+            ResultManufacturerAsync(mySklad1, mySklad2).GetAwaiter();
 
             Console.WriteLine("Press any key to continue . . . ");
             Console.ReadKey(true);
         }
 
+        //TODO Нужно перемешать массив поток, иначе запускаются последовательно!!!
         // Построитель потоков
-        static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2, int k, int j)
+        static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2)
         {
-            Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist];    // Масив всех потоков
+            Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist + ThreadsConsumer];    // Масив всех потоков
+
             for (int i = 0; i < ThreadsManufactur; i++)         
-                myTask[i] = ManufacturerAsync(mySklad1, j);   // Производители
+                myTask[i] = ManufacturerAsync(mySklad1);                    // Производители
 
             for (int i = ThreadsManufactur; i < ThreadsManufactur + ThreadsLogist; i++)
-                myTask[i] = LogisticAsync(mySklad1, mySklad2);          // Логисты
+                myTask[i] = LogisticAsync(mySklad1, mySklad2);              // Логисты
+
+            for (int i = ThreadsManufactur + ThreadsLogist; i < ThreadsManufactur + ThreadsLogist + ThreadsConsumer; i++)
+                myTask[i] = ConsumerAsync(mySklad2);                        // Покупатели
 
             await Task.WhenAll(myTask);     // Запуск всех потоков
 
             Console.WriteLine();
             Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
-            Console.WriteLine("На 2 склае всего {0} шт. товара:", mySklad2.GetCount());            
+            Console.WriteLine("На 2 складе осталось {0} шт. товара:", mySklad2.GetCount());            
         }
 
         // Задача, "Производители" отдают товар на 1 склад
-        static Task ManufacturerAsync(Storage mySklad, int j)
+        static Task ManufacturerAsync(Storage mySklad)
         {
             return Task.Run(() =>
             {
@@ -76,6 +81,23 @@ namespace BufferObject
                     Console.WriteLine("Забрать на склад 2 поток - {0}", Thread.CurrentThread.ManagedThreadId);
                     // Имитация произвольных обращений
                     Random rnd = new Random();                    
+                    Thread.Sleep(rnd.Next(0, 1000));
+                }
+            });
+        }
+
+        // Задача для потока "потребителей"
+        static Task ConsumerAsync(Storage mySklad2)
+        {
+            return Task.Run(() =>
+            {
+                Consumer myConsumer = new Consumer();
+                for (int i = 0; i < ChainLength; i++)
+                {
+                    myConsumer.GetGoods(mySklad2);
+                    Console.WriteLine("На продажу поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    // Имитация произвольных обращений
+                    Random rnd = new Random();
                     Thread.Sleep(rnd.Next(0, 1000));
                 }
             });
