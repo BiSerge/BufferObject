@@ -77,8 +77,10 @@ namespace BufferObject
                 Logistic myLogistic = new Logistic();
                 for (int i = 0; i < ChainLength; i++)
                 {
-                    myLogistic.MoveGoods(mySklad1, mySklad2);
-                    Console.WriteLine("Забрать на склад 2 поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    if (myLogistic.MoveGoods(mySklad1, mySklad2))
+                        Console.WriteLine("Забрать на склад 2 поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    else
+                        Console.WriteLine("На складе 1 нет товара!!! Поток - {0}", Thread.CurrentThread.ManagedThreadId);
                     // Имитация произвольных обращений
                     Random rnd = new Random();                    
                     Thread.Sleep(rnd.Next(0, 1000));
@@ -94,8 +96,10 @@ namespace BufferObject
                 Consumer myConsumer = new Consumer();
                 for (int i = 0; i < ChainLength; i++)
                 {
-                    myConsumer.GetGoods(mySklad2);
-                    Console.WriteLine("На продажу поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    if (myConsumer.GetGoods(mySklad2))
+                        Console.WriteLine("На продажу поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    else
+                        Console.WriteLine("На складе 2 нет товара!!! Поток - {0}", Thread.CurrentThread.ManagedThreadId);
                     // Имитация произвольных обращений
                     Random rnd = new Random();
                     Thread.Sleep(rnd.Next(0, 1000));
