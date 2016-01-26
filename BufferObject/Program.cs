@@ -15,125 +15,31 @@ namespace BufferObject
 
         static void Main(string[] args)
         {
-            LoadSeting();
-
-            Storage mySklad1 = new Storage("Sklad1");   // Создание складов
-            Storage mySklad2 = new Storage("Sklad2");
-
-            Console.WriteLine("На складе 1 товар в количестве: {0} шт.", mySklad1.GetCount());
-            Console.WriteLine();
-
-            // Вызов построителя потоков
-            ResultManufacturerAsync(mySklad1, mySklad2).GetAwaiter();
-
-            Console.WriteLine("Press any key to continue . . . ");
-            Console.ReadKey(true);
-        }
-
-        private static void LoadSeting()
-        {
             try
             {
-                ChainLength         = int.Parse(ConfigurationManager.AppSettings[0]);
-                ThreadsManufactur   = int.Parse(ConfigurationManager.AppSettings[1]);
-                ThreadsLogist       = int.Parse(ConfigurationManager.AppSettings[2]);
-                ThreadsConsumer     = int.Parse(ConfigurationManager.AppSettings[3]);
+                ChainLength = int.Parse(ConfigurationManager.AppSettings[0]);
+                ThreadsManufactur = int.Parse(ConfigurationManager.AppSettings[1]);
+                ThreadsLogist = int.Parse(ConfigurationManager.AppSettings[2]);
+                ThreadsConsumer = int.Parse(ConfigurationManager.AppSettings[3]);
             }
             catch
             {
                 Console.WriteLine("Ошибка чтения параметров! Будут применены параметры по умолчанию");
             }
-        }
 
-        // Построитель потоков
-        private static async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2)
-        {
-            Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist + ThreadsConsumer];    // Масив всех потоков
-            RndArray(myTask);
+            Storage mySklad1 = new Storage("Sklad1");   // Создание складов
+            Storage mySklad2 = new Storage("Sklad2");
 
-            for (int i = 0; i < ThreadsManufactur; i++)         
-                myTask[i] = ManufacturerAsync(mySklad1);                    // Производители
+            ClassAsync myClassAsync = new ClassAsync(); // Клас потоков
 
-            for (int i = ThreadsManufactur; i < ThreadsManufactur + ThreadsLogist; i++)
-                myTask[i] = LogisticAsync(mySklad1, mySklad2);              // Логисты
-
-            for (int i = ThreadsManufactur + ThreadsLogist; i < ThreadsManufactur + ThreadsLogist + ThreadsConsumer; i++)
-                myTask[i] = ConsumerAsync(mySklad2);                        // Покупатели
-
-            await Task.WhenAll(myTask);     // Запуск всех потоков
-
+            Console.WriteLine("На складе 1 товар в количестве: {0} шт.", mySklad1.GetCount());
             Console.WriteLine();
-            Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
-            Console.WriteLine("На 2 складе осталось {0} шт. товара:", mySklad2.GetCount());            
-        }
 
-        private static Task[] RndArray(Task[] myTask)    // Перемешиваю массив потоков
-        {
-            if (myTask.Length < 1) return myTask;
-            var random = new Random();
-            for (var i = 0; i < myTask.Length; i++)
-            {
-                var key = myTask[i];
-                var rnd = random.Next(i, myTask.Length);
-                myTask[i] = myTask[rnd];
-                myTask[rnd] = key;
-            }
-            return myTask;
-        }
+            // Вызов построителя потоков
+            myClassAsync.ResultManufacturerAsync(mySklad1, mySklad2, ChainLength, ThreadsManufactur, ThreadsLogist, ThreadsConsumer).GetAwaiter();
 
-        // Задача, "Производители" отдают товар на 1 склад
-        private static Task ManufacturerAsync(Storage mySklad)
-        {
-            return Task.Run(() =>
-            {
-                Manufacturer myManufacturer = new Manufacturer();
-                for (int i = 0; i < ChainLength; i++)
-                { 
-                    myManufacturer.PlaceStorage(mySklad);
-                    Console.WriteLine("Положить на склад 1 поток - {0}", Thread.CurrentThread.ManagedThreadId);
-                    // Имитация произвольных обращений
-                    Random rnd = new Random();
-                    Thread.Sleep(rnd.Next(0, 1000));                   
-                }
-            });
-        }
-
-        // Задача для потока перемещения с 1 склада на 2
-        private static Task LogisticAsync(Storage mySklad1, Storage mySklad2)
-        {
-            return Task.Run(() =>
-            {
-                Logistic myLogistic = new Logistic();
-                for (int i = 0; i < ChainLength; i++)
-                {
-                    if (myLogistic.MoveGoods(mySklad1, mySklad2))
-                        Console.WriteLine("Забрать на склад 2 поток - {0}", Thread.CurrentThread.ManagedThreadId);
-                    else
-                        Console.WriteLine("На складе 1 нет товара!!! Поток - {0}", Thread.CurrentThread.ManagedThreadId);
-                    // Имитация произвольных обращений
-                    Random rnd = new Random();                    
-                    Thread.Sleep(rnd.Next(0, 1000));
-                }
-            });
-        }
-
-        // Задача для потока "потребителей"
-        private static Task ConsumerAsync(Storage mySklad2)
-        {
-            return Task.Run(() =>
-            {
-                Consumer myConsumer = new Consumer();
-                for (int i = 0; i < ChainLength; i++)
-                {
-                    if (myConsumer.GetGoods(mySklad2))
-                        Console.WriteLine("На продажу поток - {0}", Thread.CurrentThread.ManagedThreadId);
-                    else
-                        Console.WriteLine("На складе 2 нет товара!!! Поток - {0}", Thread.CurrentThread.ManagedThreadId);
-                    // Имитация произвольных обращений
-                    Random rnd = new Random();
-                    Thread.Sleep(rnd.Next(0, 1000));
-                }
-            });
-        }       
+            Console.WriteLine("Press any key to continue . . . ");
+            Console.ReadKey(true);
+        }        
     }
 }
