@@ -36,7 +36,9 @@ namespace BufferObject
             Console.WriteLine();
 
             // Вызов построителя потоков
-            myClassAsync.ResultManufacturerAsync(mySklad1, mySklad2, ChainLength, ThreadsManufactur, ThreadsLogist, ThreadsConsumer).GetAwaiter();
+            Task task = myClassAsync.ResultManufacturerAsync(mySklad1, mySklad2, ChainLength, ThreadsManufactur, ThreadsLogist,
+                ThreadsConsumer);
+            task.Wait();
 
             Console.WriteLine("Press any key to continue . . . ");
             Console.ReadKey(true);
