@@ -12,23 +12,25 @@ namespace BufferObject
         private static int ThreadsManufactur    = 3;       // Колич. потоков для производителей
         private static int ThreadsLogist        = 3;       // Колич. потоков для логистов
         private static int ThreadsConsumer      = 3;       // Колич. потоков для потребителей
+        private static int myMaxGoods           = 10;      // Объем склада
 
         static void Main(string[] args)
         {
             try
             {
-                ChainLength = int.Parse(ConfigurationManager.AppSettings[0]);
-                ThreadsManufactur = int.Parse(ConfigurationManager.AppSettings[1]);
-                ThreadsLogist = int.Parse(ConfigurationManager.AppSettings[2]);
-                ThreadsConsumer = int.Parse(ConfigurationManager.AppSettings[3]);
+                ChainLength         = int.Parse(ConfigurationManager.AppSettings[0]);
+                ThreadsManufactur   = int.Parse(ConfigurationManager.AppSettings[1]);
+                ThreadsLogist       = int.Parse(ConfigurationManager.AppSettings[2]);
+                ThreadsConsumer     = int.Parse(ConfigurationManager.AppSettings[3]);
+                myMaxGoods          = int.Parse(ConfigurationManager.AppSettings[4]);
             }
             catch
             {
                 Console.WriteLine("Ошибка чтения параметров! Будут применены параметры по умолчанию");
             }
 
-            Storage mySklad1 = new Storage("Sklad1");   // Создание складов
-            Storage mySklad2 = new Storage("Sklad2");
+            Storage mySklad1 = new Storage(myMaxGoods, "Sklad1");   // Создание складов
+            Storage mySklad2 = new Storage(myMaxGoods, "Sklad2");
 
             ClassAsync myClassAsync = new ClassAsync(); // Клас потоков
 
