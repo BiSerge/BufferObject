@@ -11,7 +11,7 @@ namespace BufferObject.WorkStorage
         // TODO Возможно нужна обработка если товара на складе нет
         public bool GetGoods(Storage myStorage2)
         {
-            if (myStorage2.GetTovar() != null)
+            if (myStorage2.GetGoods() != null)
                 return true;
             else
                 return false;

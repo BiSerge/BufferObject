@@ -6,10 +6,10 @@ namespace BufferObject.WorkStorage
         // TODO Возможно нужна обработка если товар не перещен
         public bool MoveGoods(Storage myStorage1, Storage myStorage2)
         {
-            Goods myTovar = myStorage1.GetTovar();
+            Goods myTovar = myStorage1.GetGoods();
             if (myTovar != null)
             {
-                myStorage2.AddTovar(myTovar);
+                myStorage2.AddGoods(myTovar);
                 return true;
             }
             else

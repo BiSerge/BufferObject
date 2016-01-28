@@ -12,7 +12,7 @@ namespace BufferObject.WorkStorage
 
         public void PlaceStorage(Storage myStorage)
         {
-            myStorage.AddTovar(myTovar = new Goods());
+            myStorage.AddGoods(myTovar = new Goods());
         }
     }
 }
