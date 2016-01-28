@@ -23,5 +23,22 @@ namespace BufferObjectTest
             int actual = myStorage.GetCount();
             Assert.AreEqual(expected, actual, 0, "Товар не добавляется на склад!");
         }
+
+        [TestMethod]
+        public void GetGoods_GetGoods()
+        {
+            // arrange
+            int myMaxGoods = 10;
+            Storage myStorage = new Storage(myMaxGoods, "SkladTest");
+            Goods expected = new Goods();
+            //Goods expected = myTovar;
+
+            // act
+            myStorage.AddGoods(expected);
+
+            // assert
+            Goods actual = myStorage.GetGoods();
+            Assert.AreEqual(expected, actual, "Товар не получен!");
+        }
     }
 }
