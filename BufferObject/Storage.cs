@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 namespace BufferObject
 {
     [Serializable]
-    public class Storage
+    public class Storage : IStorage
     {
         private ConcurrentQueue<Goods> myQueue = new ConcurrentQueue<Goods>();
         private int myMaxGoods;
