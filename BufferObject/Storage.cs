@@ -63,21 +63,35 @@ namespace BufferObject
         
         private void SaveSklad(string myFileName)
         {
-            BinaryFormatter binFormat = new BinaryFormatter();
-            using (Stream fStream = new FileStream(myFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+            try
             {
-                binFormat.Serialize(fStream, myQueue);
-                Console.WriteLine("--> Сохранение склада в файл");
-            }            
+                BinaryFormatter binFormat = new BinaryFormatter();
+                using (Stream fStream = new FileStream(myFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    binFormat.Serialize(fStream, myQueue);
+                    Console.WriteLine("--> Сохранение склада в файл");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка записи данных склада в файл " + ex.Message);
+            }
         }
         
         private void LoadSklad(string myFileName)
         {
-            BinaryFormatter binFormat = new BinaryFormatter();
-            using (Stream fStream = File.OpenRead(myFileName))
+            try
             {
-                myQueue = (ConcurrentQueue<Goods>)binFormat.Deserialize(fStream);
-                Console.WriteLine("--> Чтение склада из файла");
+                BinaryFormatter binFormat = new BinaryFormatter();
+                using (Stream fStream = File.OpenRead(myFileName))
+                {
+                    myQueue = (ConcurrentQueue<Goods>)binFormat.Deserialize(fStream);
+                    Console.WriteLine("--> Чтение склада из файла");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка чтения данных склада из файл " + ex.Message);
             }
         }
     }
