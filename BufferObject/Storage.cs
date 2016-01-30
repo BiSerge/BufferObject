@@ -37,7 +37,7 @@ namespace BufferObject
             try
             {
                 if (myQueue.Count >= myMaxGoods)
-                    throw new Exception("Переполнение склада " + myName);
+                    throw new OverflowException("Переполнение склада " + myName);
                 else
                     myQueue.Enqueue(tovar);
             }
