@@ -6,7 +6,7 @@ using BufferObject.WorkStorage;
 
 namespace BufferObject
 {
-    class ClassAsync
+    class FlowControlAsync
     {
         // Построитель потоков
         public async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2, int ChainLength, 
@@ -24,11 +24,47 @@ namespace BufferObject
             for (int i = ThreadsManufactur + ThreadsLogist; i < ThreadsManufactur + ThreadsLogist + ThreadsConsumer; i++)
                 myTask[i] = ConsumerAsync(mySklad2, ChainLength);                        // Покупатели
 
-            await Task.WhenAll(myTask);     // Запуск всех потоков
+
+            Task allTasks = Task.WhenAll(myTask);
+            try
+            {
+                await allTasks;     // Запуск всех потоков
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine("===>");
+                //Console.WriteLine("Исключение: " + ex.Message);
+                //Console.WriteLine("IsFaulted: " + allTasks.IsFaulted);
+                //foreach (var inx in allTasks.Exception.InnerExceptions)
+                //{
+                //    Console.WriteLine("Внутренне исключение: " + inx.Message);
+                //}
+                //Console.WriteLine("===>");
+
+                await Log(ex, allTasks);
+            }
 
             Console.WriteLine();
             Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
             Console.WriteLine("На 2 складе осталось {0} шт. товара:", mySklad2.GetCount());
+        }
+
+        private async Task Log(Exception ex, Task tasks)
+        {
+            await Task.Run(() =>
+            {
+                //Console.WriteLine(ex);
+
+                Console.WriteLine();
+                Console.WriteLine("===>");
+                Console.WriteLine("Исключение: " + ex.Message);
+                Console.WriteLine("IsFaulted: " + tasks.IsFaulted);
+                foreach (var inx in tasks.Exception.InnerExceptions)
+                {
+                    Console.WriteLine("Внутренне исключение: " + inx.Message);
+                }
+                Console.WriteLine("===>");
+            });
         }
 
         private Task[] RndArray(Task[] myTask)    // Перемешиваю массив потоков
@@ -54,7 +90,7 @@ namespace BufferObject
                 for (int i = 0; i < ChainLength; i++)
                 {
                     myManufacturer.PlaceStorage(mySklad);
-                    Console.WriteLine("Положить на склад 1 поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                    Console.WriteLine("На склад 1, поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     // Имитация произвольных обращений
                     Random rnd = new Random();
                     Thread.Sleep(rnd.Next(0, 1000));
@@ -71,9 +107,9 @@ namespace BufferObject
                 for (int i = 0; i < ChainLength; i++)
                 {
                     if (myLogistic.MoveGoods(mySklad1, mySklad2))
-                        Console.WriteLine("Забрать на склад 2 поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                        Console.WriteLine("На склад 2, поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     else
-                        Console.WriteLine("На складе 1 нет товара!!! Поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                        Console.WriteLine("На складе 1 нет товара!!! Поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     // Имитация произвольных обращений
                     Random rnd = new Random();
                     Thread.Sleep(rnd.Next(0, 1000));
@@ -90,9 +126,9 @@ namespace BufferObject
                 for (int i = 0; i < ChainLength; i++)
                 {
                     if (myConsumer.GetGoods(mySklad2))
-                        Console.WriteLine("На продажу поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                        Console.WriteLine("На продажу поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     else
-                        Console.WriteLine("На складе 2 нет товара!!! Поток - {0}", Thread.CurrentThread.ManagedThreadId);
+                        Console.WriteLine("На складе 2 нет товара!!! Поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     // Имитация произвольных обращений
                     Random rnd = new Random();
                     Thread.Sleep(rnd.Next(0, 1000));

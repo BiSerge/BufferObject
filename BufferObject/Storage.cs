@@ -30,16 +30,11 @@ namespace BufferObject
         	SaveSklad(myFileName);
         }
 
-        //internal void AddTovar(object p)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public void AddGoods(Goods tovar)
         {
-            //if (myQueue.Count >= myMaxGoods)
-            //    throw new ArgumentOutOfRangeException("amount", OverflowStorage);
-            //else
+            if (myQueue.Count >= myMaxGoods)
+                throw new ArgumentOutOfRangeException("amount", OverflowStorage);
+            else
                 myQueue.Enqueue(tovar);
         }
 

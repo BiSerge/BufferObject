@@ -32,7 +32,7 @@ namespace BufferObject
             Storage mySklad1 = new Storage(myMaxGoods, "Sklad1");   // Создание складов
             Storage mySklad2 = new Storage(myMaxGoods, "Sklad2");
 
-            ClassAsync myClassAsync = new ClassAsync(); // Клас потоков
+            FlowControlAsync myClassAsync = new FlowControlAsync(); // Клас потоков
 
             Console.WriteLine("На складе 1 товар в количестве: {0} шт.", mySklad1.GetCount());
             Console.WriteLine();
