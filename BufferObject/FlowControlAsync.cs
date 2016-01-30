@@ -32,39 +32,18 @@ namespace BufferObject
             }
             catch (Exception ex)
             {
-                //Console.WriteLine("===>");
-                //Console.WriteLine("Исключение: " + ex.Message);
-                //Console.WriteLine("IsFaulted: " + allTasks.IsFaulted);
-                //foreach (var inx in allTasks.Exception.InnerExceptions)
-                //{
-                //    Console.WriteLine("Внутренне исключение: " + inx.Message);
-                //}
-                //Console.WriteLine("===>");
-
-                await Log(ex, allTasks);
+                Console.WriteLine("===>");
+                Console.WriteLine("Исключение: " + ex.Message);
+                foreach (var inx in allTasks.Exception.InnerExceptions)
+                {
+                    Console.WriteLine("Внутренне исключение: " + inx.Message);
+                }
+                Console.WriteLine("===>");
             }
 
             Console.WriteLine();
             Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
             Console.WriteLine("На 2 складе осталось {0} шт. товара:", mySklad2.GetCount());
-        }
-
-        private async Task Log(Exception ex, Task tasks)
-        {
-            await Task.Run(() =>
-            {
-                //Console.WriteLine(ex);
-
-                Console.WriteLine();
-                Console.WriteLine("===>");
-                Console.WriteLine("Исключение: " + ex.Message);
-                Console.WriteLine("IsFaulted: " + tasks.IsFaulted);
-                foreach (var inx in tasks.Exception.InnerExceptions)
-                {
-                    Console.WriteLine("Внутренне исключение: " + inx.Message);
-                }
-                Console.WriteLine("===>");
-            });
         }
 
         private Task[] RndArray(Task[] myTask)    // Перемешиваю массив потоков

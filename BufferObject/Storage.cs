@@ -11,13 +11,15 @@ namespace BufferObject
     {
         private ConcurrentQueue<Goods> myQueue = new ConcurrentQueue<Goods>();
         private int myMaxGoods;
+        private string myName;
         private string myFileName;
-        private const string OverflowStorage = "Переполнение склада.";
+        //private const string OverflowStorage = "Переполнение склада.";
 
         public Storage(int myMaxGoods, string myName)
         {
             this.myMaxGoods = myMaxGoods;
-            myFileName += myName + ".dat";            
+            this.myName = myName;
+            myFileName = myName + ".dat";            
         	
         	if (File.Exists(myFileName))
         	{
@@ -32,10 +34,17 @@ namespace BufferObject
 
         public void AddGoods(Goods tovar)
         {
-            if (myQueue.Count >= myMaxGoods)
-                throw new ArgumentOutOfRangeException("amount", OverflowStorage);
-            else
-                myQueue.Enqueue(tovar);
+            try
+            {
+                if (myQueue.Count >= myMaxGoods)
+                    throw new Exception("Переполнение склада " + myName);
+                else
+                    myQueue.Enqueue(tovar);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Исключение: " + ex.Message);
+            }
         }
 
         public Goods GetGoods()
