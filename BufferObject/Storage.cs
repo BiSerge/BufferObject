@@ -29,17 +29,17 @@ namespace BufferObject
 
         public void AddGoods(Goods tovar)
         {
-            try
-            {
+            //try
+            //{
                 if (myQueue.Count >= myMaxGoods)
                     throw new OverflowException("Переполнение склада " + myNameStorage);
                 else
                     myQueue.Enqueue(tovar);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Исключение: " + ex.Message);
-            }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine("Исключение: " + ex.Message);
+            //    }
         }
 
         public Goods GetGoods()
