@@ -19,9 +19,7 @@ namespace BufferObject
             string myFileName = Name + ".dat";            
         	
         	if (File.Exists(myFileName))
-        	{
         		LoadSklad(myFileName);
-        	}
         }
 
         public void Dispose()
@@ -60,18 +58,24 @@ namespace BufferObject
         
         private void SaveSklad(string FileName)
         {
-            try
+            if (myQueue.IsEmpty)    // если склад пуст удаляем файл, чтоб не далать загрузку пустого в конструкторе
+                if (File.Exists(FileName))
+                    File.Delete(FileName);
+            else
             {
-                BinaryFormatter binFormat = new BinaryFormatter();
-                using (Stream fStream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                try
                 {
-                    binFormat.Serialize(fStream, myQueue);
-                    Console.WriteLine("--> Сохранение склада в файл");
+                    BinaryFormatter binFormat = new BinaryFormatter();
+                    using (Stream fStream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        binFormat.Serialize(fStream, myQueue);
+                        Console.WriteLine("--> Сохранение склада в файл");
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Ошибка записи данных склада в файл " + ex.Message);
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Ошибка записи данных склада в файл " + ex.Message);
+                }
             }
         }
         
