@@ -29,17 +29,10 @@ namespace BufferObject
 
         public void AddGoods(Goods tovar)
         {
-            //try
-            //{
-                if (myQueue.Count >= myMaxGoods)
-                    throw new OverflowException("Переполнение склада " + myNameStorage);
-                else
-                    myQueue.Enqueue(tovar);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Console.WriteLine("Исключение: " + ex.Message);
-            //    }
+            if (myQueue.Count >= myMaxGoods)
+                throw new OverflowException("Переполнение склада " + myNameStorage);
+            else
+                myQueue.Enqueue(tovar);
         }
 
         public Goods GetGoods()
@@ -71,12 +64,11 @@ namespace BufferObject
                     using (Stream fStream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         binFormat.Serialize(fStream, myQueue);
-                        Console.WriteLine("--> Сохранение склада в файл");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Ошибка записи данных склада в файл " + ex.Message);
+                    throw new Exception("Ошибка записи данных склада в файл " + ex.Message);
                 }
             }
         }
@@ -89,12 +81,11 @@ namespace BufferObject
                 using (Stream fStream = File.OpenRead(FileName))
                 {
                     myQueue = (ConcurrentQueue<Goods>)binFormat.Deserialize(fStream);
-                    Console.WriteLine("--> Чтение склада из файла");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Ошибка чтения данных склада из файл " + ex.Message);
+                throw new Exception("Ошибка чтения данных склада из файла " + ex.Message);
             }
         }
     }

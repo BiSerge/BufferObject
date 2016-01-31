@@ -25,6 +25,7 @@ namespace BufferObjectTest
         }
 
         [TestMethod]
+        [ExpectedException(typeof(OverflowException))]
         public void AddGoods_MoreThanTheMaximumAmount_QuantityDoesNotIncrease()     // При добавлении товара количество не должно привышать максимума
         {
             // Организация
@@ -37,8 +38,6 @@ namespace BufferObjectTest
                 myStorage.AddGoods(myTovar = new Goods());
 
             // Утверждение
-            int actual = myStorage.GetCount();
-            Assert.AreEqual(myMaxGoods, actual, "Количество товара больше максимального!");
         }
 
         [TestMethod]

@@ -27,18 +27,25 @@ namespace BufferObject
                 Console.WriteLine("Ошибка чтения параметров! Будут применены параметры по умолчанию");
             }
 
-            using (Storage mySklad1 = new Storage(myMaxGoods, "Sklad1"), mySklad2 = new Storage(myMaxGoods, "Sklad2"))
+            try
             {
-                FlowControlAsync myClassAsync = new FlowControlAsync(); // Клас потоков
+                using (Storage mySklad1 = new Storage(myMaxGoods, "Sklad1"), mySklad2 = new Storage(myMaxGoods, "Sklad2"))
+                {
+                    FlowControlAsync myClassAsync = new FlowControlAsync(); // Клас потоков
 
-                Console.WriteLine("На складе 1 товар в количестве: {0} шт.", mySklad1.GetCount());
-                Console.WriteLine("На складе 2 товар в количестве: {0} шт.", mySklad2.GetCount());
-                Console.WriteLine();
+                    Console.WriteLine("На складе 1 товар в количестве: {0} шт.", mySklad1.GetCount());
+                    Console.WriteLine("На складе 2 товар в количестве: {0} шт.", mySklad2.GetCount());
+                    Console.WriteLine();
 
-                // Вызов построителя потоков
-                Task task = myClassAsync.ResultManufacturerAsync(mySklad1, mySklad2, myChainLength, myThreadsManufactur,
-                    myThreadsLogist, myThreadsConsumer);
-                task.Wait();
+                    // Вызов построителя потоков
+                    Task task = myClassAsync.ResultManufacturerAsync(mySklad1, mySklad2, myChainLength, myThreadsManufactur,
+                        myThreadsLogist, myThreadsConsumer);
+                    task.Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Исключение: " + ex.Message);
             }
 
             Console.WriteLine("Press any key to continue . . . ");
