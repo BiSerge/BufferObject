@@ -11,12 +11,13 @@ namespace BufferObject
         private ConcurrentQueue<Goods> myQueue = new ConcurrentQueue<Goods>();
         private int myMaxGoods;
         private string myNameStorage;
+        private string myFileName;
 
         public Storage(int MaxGoods, string Name)
         {
             myMaxGoods = MaxGoods;
             myNameStorage = Name;
-            string myFileName = Name + ".dat";            
+            myFileName = Name + ".dat";            
         	
         	if (File.Exists(myFileName))
         		LoadSklad(myFileName);
@@ -24,7 +25,7 @@ namespace BufferObject
 
         public void Dispose()
         {
-            SaveSklad(myNameStorage + ".dat");
+            SaveSklad(myFileName);
         }
 
         public void AddGoods(Goods tovar)
