@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BufferObject.WorkStorage
+﻿namespace BufferObject.WorkStorage
 {
-    public class Manufacturer
+    public class Manufacturer   // Производитель
     {
         private Goods myTovar;
 
-        public void PlaceStorage(Storage myStorage)
+        public void PlaceStorage(Storage Storage)
         {
-            myStorage.AddGoods(myTovar = new Goods());
+            Storage.AddGoods(myTovar = new Goods());
         }
     }
 }

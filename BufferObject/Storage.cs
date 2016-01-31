@@ -1,19 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Concurrent;
 
 namespace BufferObject
 {
     [Serializable]
-    public class Storage : IStorage
+    public class Storage : IStorage, IDisposable
     {
         private ConcurrentQueue<Goods> myQueue = new ConcurrentQueue<Goods>();
         private int myMaxGoods;
         private string myNameStorage;
-        //private string myFileName;
-        //private const string OverflowStorage = "Переполнение склада.";
 
         public Storage(int MaxGoods, string Name)
         {
@@ -26,10 +23,10 @@ namespace BufferObject
         		LoadSklad(myFileName);
         	}
         }
-        
-        ~Storage()
+
+        public void Dispose()
         {
-        	SaveSklad(myNameStorage + ".dat");
+            SaveSklad(myNameStorage + ".dat");
         }
 
         public void AddGoods(Goods tovar)
@@ -61,12 +58,12 @@ namespace BufferObject
         	return myQueue.Count;
         }
         
-        private void SaveSklad(string myFileName)
+        private void SaveSklad(string FileName)
         {
             try
             {
                 BinaryFormatter binFormat = new BinaryFormatter();
-                using (Stream fStream = new FileStream(myFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (Stream fStream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     binFormat.Serialize(fStream, myQueue);
                     Console.WriteLine("--> Сохранение склада в файл");
@@ -78,12 +75,12 @@ namespace BufferObject
             }
         }
         
-        private void LoadSklad(string myFileName)
+        private void LoadSklad(string FileName)
         {
             try
             {
                 BinaryFormatter binFormat = new BinaryFormatter();
-                using (Stream fStream = File.OpenRead(myFileName))
+                using (Stream fStream = File.OpenRead(FileName))
                 {
                     myQueue = (ConcurrentQueue<Goods>)binFormat.Deserialize(fStream);
                     Console.WriteLine("--> Чтение склада из файла");

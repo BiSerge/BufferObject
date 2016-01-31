@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BufferObject.WorkStorage
+﻿namespace BufferObject.WorkStorage
 {
-    public class Consumer
+    public class Consumer   // Потребитель
     {
-        // TODO Возможно нужна обработка если товара на складе нет
-        public bool GetGoods(Storage myStorage2)
+        public bool GetGoods(Storage Storage)
         {
-            if (myStorage2.GetGoods() != null)
+            if (Storage.GetGoods() != null)
                 return true;
             else
                 return false;

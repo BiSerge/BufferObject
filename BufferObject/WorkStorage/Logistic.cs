@@ -1,15 +1,14 @@
 ﻿
 namespace BufferObject.WorkStorage
 {
-    public class Logistic
+    public class Logistic   // Перемещает товар со склада А на склад Б
     {
-        // TODO Возможно нужна обработка если товар не перещен
-        public bool MoveGoods(Storage myStorage1, Storage myStorage2)
+        public bool MoveGoods(Storage TakeStorage, Storage PlaceStorage)
         {
-            Goods myTovar = myStorage1.GetGoods();
+            Goods myTovar = TakeStorage.GetGoods();
             if (myTovar != null)
             {
-                myStorage2.AddGoods(myTovar);
+                PlaceStorage.AddGoods(myTovar);
                 return true;
             }
             else

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Configuration;
 using BufferObject.WorkStorage;
 
 namespace BufferObject
@@ -9,20 +8,20 @@ namespace BufferObject
     class FlowControlAsync
     {
         // Построитель потоков
-        public async Task ResultManufacturerAsync(Storage mySklad1, Storage mySklad2, int ChainLength, 
+        public async Task ResultManufacturerAsync(Storage Sklad1, Storage Sklad2, int ChainLength, 
             int ThreadsManufactur, int ThreadsLogist, int ThreadsConsumer)
         {
-            Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist + ThreadsConsumer];    // Масив всех потоков
+            Task[] myTask = new Task[ThreadsManufactur + ThreadsLogist + ThreadsConsumer];      // Масив всех потоков
             RndArray(myTask);
 
             for (int i = 0; i < ThreadsManufactur; i++)
-                myTask[i] = ManufacturerAsync(mySklad1, ChainLength);                    // Производители
+                myTask[i] = ManufacturerAsync(Sklad1, ChainLength);                           // Производители
 
             for (int i = ThreadsManufactur; i < ThreadsManufactur + ThreadsLogist; i++)
-                myTask[i] = LogisticAsync(mySklad1, mySklad2, ChainLength);              // Логисты
+                myTask[i] = LogisticAsync(Sklad1, Sklad2, ChainLength);                     // Логисты
 
             for (int i = ThreadsManufactur + ThreadsLogist; i < ThreadsManufactur + ThreadsLogist + ThreadsConsumer; i++)
-                myTask[i] = ConsumerAsync(mySklad2, ChainLength);                        // Покупатели
+                myTask[i] = ConsumerAsync(Sklad2, ChainLength);                               // Покупатели
 
 
             Task allTasks = Task.WhenAll(myTask);
@@ -42,8 +41,8 @@ namespace BufferObject
             }
 
             Console.WriteLine();
-            Console.WriteLine("На 1 складе осталось {0} шт. товара:", mySklad1.GetCount());
-            Console.WriteLine("На 2 складе осталось {0} шт. товара:", mySklad2.GetCount());
+            Console.WriteLine("На 1 складе осталось {0} шт. товара:", Sklad1.GetCount());
+            Console.WriteLine("На 2 складе осталось {0} шт. товара:", Sklad2.GetCount());
         }
 
         private Task[] RndArray(Task[] myTask)    // Перемешиваю массив потоков
@@ -61,14 +60,14 @@ namespace BufferObject
         }
 
         // Задача, "Производители" отдают товар на 1 склад
-        private Task ManufacturerAsync(Storage mySklad, int ChainLength)
+        private Task ManufacturerAsync(Storage Sklad, int ChainLength)
         {
             return Task.Run(() =>
             {
                 Manufacturer myManufacturer = new Manufacturer();
                 for (int i = 0; i < ChainLength; i++)
                 {
-                    myManufacturer.PlaceStorage(mySklad);
+                    myManufacturer.PlaceStorage(Sklad);
                     Console.WriteLine("На склад 1, поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     // Имитация произвольных обращений
                     Random rnd = new Random();
@@ -78,14 +77,14 @@ namespace BufferObject
         }
 
         // Задача для потока перемещения с 1 склада на 2
-        private Task LogisticAsync(Storage mySklad1, Storage mySklad2, int ChainLength)
+        private Task LogisticAsync(Storage Sklad1, Storage Sklad2, int ChainLength)
         {
             return Task.Run(() =>
             {
                 Logistic myLogistic = new Logistic();
                 for (int i = 0; i < ChainLength; i++)
                 {
-                    if (myLogistic.MoveGoods(mySklad1, mySklad2))
+                    if (myLogistic.MoveGoods(Sklad1, Sklad2))
                         Console.WriteLine("На склад 2, поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     else
                         Console.WriteLine("На складе 1 нет товара!!! Поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
@@ -97,14 +96,14 @@ namespace BufferObject
         }
 
         // Задача для потока "потребителей"
-        private Task ConsumerAsync(Storage mySklad2, int ChainLength)
+        private Task ConsumerAsync(Storage Sklad2, int ChainLength)
         {
             return Task.Run(() =>
             {
                 Consumer myConsumer = new Consumer();
                 for (int i = 0; i < ChainLength; i++)
                 {
-                    if (myConsumer.GetGoods(mySklad2))
+                    if (myConsumer.GetGoods(Sklad2))
                         Console.WriteLine("На продажу поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
                     else
                         Console.WriteLine("На складе 2 нет товара!!! Поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
