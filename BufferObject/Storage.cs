@@ -59,8 +59,10 @@ namespace BufferObject
         private void SaveSklad(string FileName)
         {
             if (myQueue.IsEmpty)    // если склад пуст удаляем файл, чтоб не далать загрузку пустого в конструкторе
+            {
                 if (File.Exists(FileName))
                     File.Delete(FileName);
+            }
             else
             {
                 try
