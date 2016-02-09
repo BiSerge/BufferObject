@@ -1,5 +1,5 @@
 ﻿
-namespace BufferObject
+namespace BufferObject.Storages
 {
     interface IStorage
     {

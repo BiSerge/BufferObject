@@ -1,4 +1,6 @@
-﻿namespace BufferObject.WorkStorage
+﻿using BufferObject.Storages;
+
+namespace BufferObject.WorkStorage
 {
     public class Manufacturer   // Производитель
     {

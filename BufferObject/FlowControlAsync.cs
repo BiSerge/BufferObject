@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using BufferObject.WorkStorage;
+using BufferObject.Storages;
 
 namespace BufferObject
 {
@@ -56,9 +57,9 @@ namespace BufferObject
                     {
                         myManufacturer.PlaceStorage(Sklad);
                     }
-                    catch (Exception ex)
+                        catch (Exception ex)
                     {
-                        Console.WriteLine("Исключение: " + ex.Message);
+                        Console.WriteLine("Исключение склад 1: " + ex.Message);
                     }
 
                     Console.WriteLine("На склад 1, поток - {0}, проход - {1}", Thread.CurrentThread.ManagedThreadId, i);
@@ -87,7 +88,7 @@ namespace BufferObject
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Исключение: " + ex.Message);
+                        Console.WriteLine("Исключение склад 2: " + ex.Message);
                     }
 
                     // Имитация произвольных обращений

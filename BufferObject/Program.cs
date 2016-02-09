@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Configuration;
+using BufferObject.Storages;
 
 namespace BufferObject
 {
@@ -42,13 +43,13 @@ namespace BufferObject
                         myThreadsLogist, myThreadsConsumer);
                     task.Wait();
                 }
-            }
+        }
             catch (Exception ex)
             {
-                Console.WriteLine("Исключение: " + ex.Message);
+                Console.WriteLine("Исключение при работе: " + ex.Message);
             }
 
-            Console.WriteLine("Press any key to continue . . . ");
+    Console.WriteLine("Press any key to continue . . . ");
             Console.ReadKey(true);
         }        
     }

@@ -1,4 +1,5 @@
-﻿
+﻿using BufferObject.Storages;
+
 namespace BufferObject.WorkStorage
 {
     public class Logistic   // Перемещает товар со склада А на склад Б
