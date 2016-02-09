@@ -23,12 +23,12 @@ namespace BufferObject.Storages
         int _tovarCount = 0;        // счет товара для записи в файл
         int _tovarAllCount = 0;     // сколько товара записано
         int _currentFile = 0;       // индекс текущего имени файла       
-        int _tovarMax = 50;         // макс. колич. товара в 1 файле        !!! 50% от макс. колч. в памяти
+        int _tovarMax = 0;         // макс. колич. товара в 1 файле        !!! 50% от макс. колч. в памяти
         int _filesMax = 4;			// макс. колич. файлов
         //[NonSerialized]
         Stream _fStreamSave;
         //[NonSerialized]
-        Stream _fStreamRead;
+        //Stream _fStreamRead;
         //[NonSerialized]
         BinaryFormatter _binFormat = new BinaryFormatter();
         //[NonSerialized]
@@ -40,11 +40,12 @@ namespace BufferObject.Storages
         public Storage(int MaxGoods, string Name)
         {
             myMaxGoods = MaxGoods;
+            _tovarMax = MaxGoods / 2;
             myNameStorage = Name;
-            myFileName = Name + ".dat";            
-        	
-        	if (File.Exists(myFileName))
-        		LoadSklad(myFileName);
+            myFileName = Name + ".dat";
+
+            if (File.Exists(myFileName))
+                LoadSklad(myFileName);
         }
 
         public void Dispose()
@@ -53,6 +54,9 @@ namespace BufferObject.Storages
 
             if (_fStreamSave != null)
                 _fStreamSave.Close();
+
+            if (_cacheFile != null)
+                _cacheFile.Dispose();
 
             //if (_diskStorage != null)
             //    SaveDiskStorage();
@@ -86,12 +90,12 @@ namespace BufferObject.Storages
             else
                 return null;
         }
-        
+
         public int GetCount()
         {
-        	return myQueue.Count + _tovarAllCount;
+            return myQueue.Count + _tovarAllCount;
         }
-        
+
         private void SaveSklad(string FileName)
         {
             if (myQueue.IsEmpty)    // если склад пуст удаляем файл, чтоб не далать загрузку пустого в конструкторе
@@ -124,7 +128,7 @@ namespace BufferObject.Storages
             //    binFormat.Serialize(fStream, _diskStorage);
             //}
         }
-        
+
         private void LoadSklad(string FileName)
         {
             try
@@ -158,10 +162,10 @@ namespace BufferObject.Storages
             _fStreamSave = new FileStream(_file, FileMode.Create, FileAccess.Write);
         }
 
-        private void OpenFileStreamRead(string _file)
-        {
-            _fStreamRead = new FileStream(_file, FileMode.Create, FileAccess.Write);
-        }
+        //private void OpenFileStreamRead(string _file)
+        //{
+        //    _fStreamRead = new FileStream(_file, FileMode.Create, FileAccess.Write);
+        //}
 
         public void AddDiskGoods(Goods _tovar)
         {
@@ -191,6 +195,28 @@ namespace BufferObject.Storages
             finally
             {
                 _cacheFile.ExitWriteLock();
+            }
+        }
+
+        private void ReadDiskGoods(string _file)
+        {
+            _cacheFile.EnterReadLock();
+            try
+            {
+                BinaryFormatter binFormat = new BinaryFormatter();
+                using (Stream fStream = new FileStream(_file, FileMode.Open, FileAccess.Read))
+                {
+                    for (int i = 0; i < _tovarMax; i++)
+                    {
+                        //_tovar8 = (Goods)binFormat.Deserialize(FileStream);
+                        //myQueue.Enqueue(tovar);
+                        myQueue.Enqueue((Goods)binFormat.Deserialize(fStream));
+                    }
+                }
+            }
+            finally
+            {
+                _cacheFile.ExitReadLock();
             }
         }
     }
