@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace BufferObject.Storages
 {
@@ -13,25 +14,23 @@ namespace BufferObject.Storages
         private int myMaxGoods;
         private string myNameStorage;
         private string myFileName;
-        //private DiskStorage _diskStorage = new DiskStorage();
-        //private DiskStorage _diskStorage;
         int _sklad = 1;
 
-        string[] _listOfFiles;      // список имен файлов
+        //string[] _listOfFiles;      // список имен файлов
         string _nameSklad = "";		// имя склада для формирования имени файла
-        int _listOfFilesCount = 0; // колич. сохр. файлов
+        //int _listOfFilesCount = 0; // колич. сохр. файлов
         int _tovarCount = 0;        // счет товара для записи в файл
         int _tovarAllCount = 0;     // сколько товара записано
-        int _currentFile = 0;       // индекс текущего имени файла       
+        //int _currentFile = 0;       // индекс текущего имени файла       
         int _tovarMax = 0;         // макс. колич. товара в 1 файле        !!! 50% от макс. колч. в памяти
         int _filesMax = 4;			// макс. колич. файлов
-        //[NonSerialized]
+
+        Queue<string> _listFilesWrite = new Queue<string>();     // Список файлов для записи
+        Queue<string> _listFilesRead = new Queue<string>();     // Список файлов для чтения
+
         Stream _fStreamSave;
-        //[NonSerialized]
         //Stream _fStreamRead;
-        //[NonSerialized]
         BinaryFormatter _binFormat = new BinaryFormatter();
-        //[NonSerialized]
         ReaderWriterLockSlim _cacheFile = new ReaderWriterLockSlim();
 
         bool _writeDisk = false;
@@ -87,6 +86,8 @@ namespace BufferObject.Storages
             Goods myGoods;
             if (myQueue.TryDequeue(out myGoods))
                 return myGoods;
+            //else if (_listFilesRead.Count != 0)
+            //    ReadDiskGoods();
             else
                 return null;
         }
@@ -147,18 +148,20 @@ namespace BufferObject.Storages
 
         private void WriteDiskStart()
         {
-            _currentFile = 0;
-            //this._nameSklad = _nameSklad;
-            _listOfFiles = new string[_filesMax];
+            //_currentFile = 0;
+            ////this._nameSklad = _nameSklad;
+            //_listOfFiles = new string[_filesMax];
 
             for (int i = 0; i < _filesMax; i++)
-                _listOfFiles[i] = myNameStorage + "00" + i.ToString() + ".dat";
+                _listFilesWrite.Enqueue(myNameStorage + "00" + i.ToString() + ".dat");
 
-            OpenFileStreamSave(_listOfFiles[_currentFile]);
+            OpenFileStreamSave();
         }
 
-        private void OpenFileStreamSave(string _file)
+        private void OpenFileStreamSave()
         {
+            string _file = _listFilesWrite.Dequeue();
+            _listFilesRead.Enqueue(_file);
             _fStreamSave = new FileStream(_file, FileMode.Create, FileAccess.Write);
         }
 
@@ -177,13 +180,13 @@ namespace BufferObject.Storages
 
                 if (_tovarCount > _tovarMax)
                 {
-                    _fStreamSave.Close();
-                    _currentFile++;
-                    if (_currentFile > _filesMax - 1)
+                    //_fStreamSave.Close();
+                    //_currentFile++;
+                    if (_listFilesWrite.Count == 0)
                         throw new OverflowException("Переполнение склада !!!!!");
                     _tovarCount = 1;
-                    _listOfFilesCount++;
-                    OpenFileStreamSave(_listOfFiles[_currentFile]);
+                    //_listOfFilesCount++;
+                    OpenFileStreamSave();
                 }
 
                 _binFormat.Serialize(_fStreamSave, _tovar);
@@ -198,8 +201,10 @@ namespace BufferObject.Storages
             }
         }
 
-        private void ReadDiskGoods(string _file)
+        private void ReadDiskGoods()
         {
+            string _file = _listFilesRead.Dequeue();
+            _listFilesWrite.Enqueue(_file);
             _cacheFile.EnterReadLock();
             try
             {
