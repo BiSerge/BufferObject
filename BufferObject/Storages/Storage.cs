@@ -14,6 +14,7 @@ namespace BufferObject.Storages
         private int myMaxGoods;
         private string myNameStorage;
         private string myFileName;
+        private string _fileParam = "StorageParam.dat";
 
         int _tovarCount = 0;        // счет товара для записи в файл
         int _tovarAllCount = 0;     // сколько товара записано     
@@ -39,11 +40,15 @@ namespace BufferObject.Storages
 
             if (File.Exists(myFileName))
                 LoadSklad(myFileName);
+
+            if (File.Exists(_fileParam))
+                LoadParam(_fileParam);
         }
 
         public void Dispose()
         {
             SaveSklad(myFileName);
+            SaveParam(_fileParam);
 
             if (_fStreamSave != null)
                 _fStreamSave.Close();
@@ -74,8 +79,14 @@ namespace BufferObject.Storages
             Goods myGoods;
             if (myQueue.TryDequeue(out myGoods))
                 return myGoods;
-            //else if (_listFilesRead.Count != 0)
-            //    ReadDiskGoods();
+            else if (_listFilesRead.Count != 0)
+            {
+                ReadDiskGoods();
+                if (myQueue.TryDequeue(out myGoods))
+                    return myGoods;
+                else
+                    return null;
+            }
             else
                 return null;
         }
@@ -109,13 +120,29 @@ namespace BufferObject.Storages
             }
         }
 
-        private void SaveDiskStorage()
+        private void SaveParam(string _fileParam)
         {
-            //BinaryFormatter binFormat = new BinaryFormatter();
-            //using (Stream fStream = new FileStream("DiskStorage.dat", FileMode.Create, FileAccess.Write, FileShare.None))
-            //{
-            //    binFormat.Serialize(fStream, _diskStorage);
-            //}
+            BinaryFormatter binFormat = new BinaryFormatter();
+            using (Stream fStream = new FileStream(_fileParam, FileMode.Create, FileAccess.Write))
+            {
+                binFormat.Serialize(fStream, _tovarCount);
+                binFormat.Serialize(fStream, _tovarAllCount);
+                binFormat.Serialize(fStream, _listFilesWrite);
+                binFormat.Serialize(fStream, _listFilesRead);
+            }
+        }
+
+        private void LoadParam(string _fileParam)
+        {
+            BinaryFormatter binFormat = new BinaryFormatter();
+            using (Stream fStream = new FileStream(_fileParam, FileMode.Open, FileAccess.Read))
+            {
+                _tovarCount = (int)binFormat.Deserialize(fStream);
+                _tovarAllCount = (int)binFormat.Deserialize(fStream);
+                _listFilesWrite.Enqueue((string)binFormat.Deserialize(fStream));
+                _listFilesRead.Enqueue((string)binFormat.Deserialize(fStream));
+                //myQueue.Enqueue((Goods)binFormat.Deserialize(fStream));
+            }
         }
 
         private void LoadSklad(string FileName)
