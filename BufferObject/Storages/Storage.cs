@@ -42,7 +42,10 @@ namespace BufferObject.Storages
                 LoadSklad(myFileName);
 
             if (File.Exists(_fileParam))
+            {
                 LoadParam(_fileParam);
+                _writeDisk = true;
+            }
         }
 
         public void Dispose()
@@ -139,8 +142,8 @@ namespace BufferObject.Storages
             {
                 _tovarCount = (int)binFormat.Deserialize(fStream);
                 _tovarAllCount = (int)binFormat.Deserialize(fStream);
-                _listFilesWrite.Enqueue((string)binFormat.Deserialize(fStream));
-                _listFilesRead.Enqueue((string)binFormat.Deserialize(fStream));
+                _listFilesWrite = ((Queue<string>)binFormat.Deserialize(fStream));
+                _listFilesRead = ((Queue<string>)binFormat.Deserialize(fStream));
                 //myQueue.Enqueue((Goods)binFormat.Deserialize(fStream));
             }
         }
@@ -178,6 +181,8 @@ namespace BufferObject.Storages
         
         public void AddDiskGoods(Goods _tovar)
         {
+            if (_fStreamSave == null)
+                OpenFileStreamSave();
             _cacheFile.EnterWriteLock();
             try
             {

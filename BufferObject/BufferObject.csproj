@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FlowControlAsync.cs" />
-    <Compile Include="Storages\DiskStorage.cs" />
     <Compile Include="Storages\IStorage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
