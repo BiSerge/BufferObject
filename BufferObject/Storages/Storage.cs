@@ -14,14 +14,9 @@ namespace BufferObject.Storages
         private int myMaxGoods;
         private string myNameStorage;
         private string myFileName;
-        int _sklad = 1;
 
-        //string[] _listOfFiles;      // список имен файлов
-        string _nameSklad = "";		// имя склада для формирования имени файла
-        //int _listOfFilesCount = 0; // колич. сохр. файлов
         int _tovarCount = 0;        // счет товара для записи в файл
-        int _tovarAllCount = 0;     // сколько товара записано
-        //int _currentFile = 0;       // индекс текущего имени файла       
+        int _tovarAllCount = 0;     // сколько товара записано     
         int _tovarMax = 0;         // макс. колич. товара в 1 файле        !!! 50% от макс. колч. в памяти
         int _filesMax = 4;			// макс. колич. файлов
 
@@ -29,7 +24,6 @@ namespace BufferObject.Storages
         Queue<string> _listFilesRead = new Queue<string>();     // Список файлов для чтения
 
         Stream _fStreamSave;
-        //Stream _fStreamRead;
         BinaryFormatter _binFormat = new BinaryFormatter();
         ReaderWriterLockSlim _cacheFile = new ReaderWriterLockSlim();
 
@@ -56,9 +50,6 @@ namespace BufferObject.Storages
 
             if (_cacheFile != null)
                 _cacheFile.Dispose();
-
-            //if (_diskStorage != null)
-            //    SaveDiskStorage();
         }
 
         public void AddGoods(Goods tovar)
@@ -69,10 +60,7 @@ namespace BufferObject.Storages
                 {
                     _writeDisk = true;
                     WriteDiskStart();
-                    //[Serializable]
-                    //_diskStorage = new DiskStorage(myNameStorage);
                 }
-                //_diskStorage.AddGoods(tovar);
                 AddDiskGoods(tovar);
 
                 //throw new OverflowException("Переполнение склада " + myNameStorage);
@@ -148,10 +136,6 @@ namespace BufferObject.Storages
 
         private void WriteDiskStart()
         {
-            //_currentFile = 0;
-            ////this._nameSklad = _nameSklad;
-            //_listOfFiles = new string[_filesMax];
-
             for (int i = 0; i < _filesMax; i++)
                 _listFilesWrite.Enqueue(myNameStorage + "00" + i.ToString() + ".dat");
 
@@ -164,12 +148,7 @@ namespace BufferObject.Storages
             _listFilesRead.Enqueue(_file);
             _fStreamSave = new FileStream(_file, FileMode.Create, FileAccess.Write);
         }
-
-        //private void OpenFileStreamRead(string _file)
-        //{
-        //    _fStreamRead = new FileStream(_file, FileMode.Create, FileAccess.Write);
-        //}
-
+        
         public void AddDiskGoods(Goods _tovar)
         {
             _cacheFile.EnterWriteLock();
@@ -180,12 +159,9 @@ namespace BufferObject.Storages
 
                 if (_tovarCount > _tovarMax)
                 {
-                    //_fStreamSave.Close();
-                    //_currentFile++;
                     if (_listFilesWrite.Count == 0)
                         throw new OverflowException("Переполнение склада !!!!!");
                     _tovarCount = 1;
-                    //_listOfFilesCount++;
                     OpenFileStreamSave();
                 }
 
@@ -213,8 +189,6 @@ namespace BufferObject.Storages
                 {
                     for (int i = 0; i < _tovarMax; i++)
                     {
-                        //_tovar8 = (Goods)binFormat.Deserialize(FileStream);
-                        //myQueue.Enqueue(tovar);
                         myQueue.Enqueue((Goods)binFormat.Deserialize(fStream));
                     }
                 }
