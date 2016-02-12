@@ -14,7 +14,7 @@ namespace BufferObject.Storages
         private int myMaxGoods;
         private string myNameStorage;
         private string myFileName;
-        private string _fileParam = "StorageParam.dat";
+        private string _fileParam = "";
 
         int _tovarCount = 0;        // счет товара для записи в файл
         int _tovarAllCount = 0;     // сколько товара записано     
@@ -28,6 +28,8 @@ namespace BufferObject.Storages
         BinaryFormatter _binFormat = new BinaryFormatter();
         ReaderWriterLockSlim _cacheFile = new ReaderWriterLockSlim();
 
+        static object _locker = new object();
+
         bool _writeDisk = false;
 
 
@@ -37,6 +39,7 @@ namespace BufferObject.Storages
             _tovarMax = MaxGoods / 2;
             myNameStorage = Name;
             myFileName = Name + ".dat";
+            _fileParam = Name + "Param.dat";
 
             if (File.Exists(myFileName))
                 LoadSklad(myFileName);
@@ -79,19 +82,29 @@ namespace BufferObject.Storages
 
         public Goods GetGoods()
         {
-            Goods myGoods;
-            if (myQueue.TryDequeue(out myGoods))
-                return myGoods;
-            else if (_listFilesRead.Count != 0)
+            //Monitor.Enter(_locker);
+            _cacheFile.EnterReadLock();
+            try
             {
-                ReadDiskGoods();
+                Goods myGoods;
                 if (myQueue.TryDequeue(out myGoods))
                     return myGoods;
+                else if (_listFilesRead.Count != 0)
+                {
+                    ReadDiskGoods();
+                    if (myQueue.TryDequeue(out myGoods))
+                        return myGoods;
+                    else
+                        return null;
+                }
                 else
                     return null;
             }
-            else
-                return null;
+            finally
+            {
+                //Monitor.Exit(_locker);
+                _cacheFile.ExitReadLock();
+            }
         }
 
         public int GetCount()
@@ -174,26 +187,28 @@ namespace BufferObject.Storages
 
         private void OpenFileStreamSave()
         {
-            string _file = _listFilesWrite.Dequeue();
-            _listFilesRead.Enqueue(_file);
+            string _file = _listFilesWrite.Peek();
+            //_listFilesRead.Enqueue(_file);
             _fStreamSave = new FileStream(_file, FileMode.Create, FileAccess.Write);
         }
         
         public void AddDiskGoods(Goods _tovar)
         {
-            if (_fStreamSave == null)
-                OpenFileStreamSave();
             _cacheFile.EnterWriteLock();
             try
             {
-                _tovarCount++;
-                _tovarAllCount++;
+                if (_fStreamSave == null)
+                    OpenFileStreamSave();
+                
 
                 if (_tovarCount > _tovarMax)
                 {
-                    if (_listFilesWrite.Count == 0)
+                    if (_listFilesWrite.Count == 1)
                         throw new OverflowException("Переполнение склада !!!!!");
+                    _tovarCount++;
+                    _tovarAllCount++;
                     _tovarCount = 1;
+                    _listFilesRead.Enqueue(_listFilesWrite.Dequeue());
                     OpenFileStreamSave();
                 }
 

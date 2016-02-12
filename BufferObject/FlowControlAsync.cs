@@ -57,7 +57,7 @@ namespace BufferObject
                     {
                         myManufacturer.PlaceStorage(Sklad);
                     }
-                        catch (Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine("Исключение склад 1: " + ex.Message);
                     }
