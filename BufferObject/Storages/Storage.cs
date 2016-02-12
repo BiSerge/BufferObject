@@ -28,7 +28,7 @@ namespace BufferObject.Storages
         BinaryFormatter _binFormat = new BinaryFormatter();
         ReaderWriterLockSlim _cacheFile = new ReaderWriterLockSlim();
 
-        static object _locker = new object();
+        //static object _locker = new object();
 
         bool _writeDisk = false;
 
@@ -65,24 +65,31 @@ namespace BufferObject.Storages
 
         public void AddGoods(Goods tovar)
         {
-            if (myQueue.Count >= myMaxGoods)
-            {
-                if (!_writeDisk)
+            //_cacheFile.EnterWriteLock();
+            //try
+            //{
+                if (myQueue.Count >= myMaxGoods)
                 {
-                    _writeDisk = true;
-                    WriteDiskStart();
-                }
-                AddDiskGoods(tovar);
+                    if (!_writeDisk)
+                    {
+                        _writeDisk = true;
+                        WriteDiskStart();
+                    }
+                    AddDiskGoods(tovar);
 
-                //throw new OverflowException("Переполнение склада " + myNameStorage);
-            }
-            else
-                myQueue.Enqueue(tovar);
+                    //throw new OverflowException("Переполнение склада " + myNameStorage);
+                }
+                else
+                    myQueue.Enqueue(tovar);
+            //}
+            //finally
+            //{
+            //    _cacheFile.ExitWriteLock();
+            //}
         }
 
         public Goods GetGoods()
         {
-            //Monitor.Enter(_locker);
             _cacheFile.EnterReadLock();
             try
             {
@@ -102,7 +109,6 @@ namespace BufferObject.Storages
             }
             finally
             {
-                //Monitor.Exit(_locker);
                 _cacheFile.ExitReadLock();
             }
         }
@@ -199,14 +205,17 @@ namespace BufferObject.Storages
             {
                 if (_fStreamSave == null)
                     OpenFileStreamSave();
-                
+                _tovarCount++;
+                _tovarAllCount++;
 
                 if (_tovarCount > _tovarMax)
                 {
                     if (_listFilesWrite.Count == 1)
+                    {
+                        _tovarAllCount--;
                         throw new OverflowException("Переполнение склада !!!!!");
-                    _tovarCount++;
-                    _tovarAllCount++;
+                    }
+                    
                     _tovarCount = 1;
                     _listFilesRead.Enqueue(_listFilesWrite.Dequeue());
                     OpenFileStreamSave();
@@ -226,11 +235,11 @@ namespace BufferObject.Storages
 
         private void ReadDiskGoods()
         {
-            string _file = _listFilesRead.Dequeue();
-            _listFilesWrite.Enqueue(_file);
             _cacheFile.EnterReadLock();
             try
             {
+                string _file = _listFilesRead.Dequeue();
+                _listFilesWrite.Enqueue(_file);
                 BinaryFormatter binFormat = new BinaryFormatter();
                 using (Stream fStream = new FileStream(_file, FileMode.Open, FileAccess.Read))
                 {
